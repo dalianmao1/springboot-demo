@@ -20,9 +20,7 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 @Slf4j
 @SpringBootTest
@@ -34,7 +32,15 @@ class SpringbootDemoWebApplicationTests {
 
     private static UserDO userDO;
 
-    private static List<Menu> list = new ArrayList<>();
+    /**
+     * 节点集合
+     */
+    private static final List<Menu> list = new ArrayList<>();
+
+    /**
+     * 用于查找上一个节点
+     */
+    private static final Map<String, Menu> map = new HashMap<>();
 
     @BeforeAll
     static void beforLoginTest() {
@@ -68,23 +74,36 @@ class SpringbootDemoWebApplicationTests {
 
     @Test
     void assembleData() throws Exception {
-        BufferedReader br = new BufferedReader(new FileReader("src/main/resources/config.txt"));
 
-        String line;
+        BufferedReader br = new BufferedReader(new FileReader("src/main/resources/config.txt"));
+        //递增id
         int index = 0;
+        //读取文件的每行数据
+        String line;
+        //节点
         Menu menu;
         while ((line = br.readLine()) != null) {
 
             String[] menuArr = line.split("&");
-            Menu pre = null;
             for (int i = 0; i < menuArr.length; i++) {
-                if (Objects.isNull(pre)) {
-                    menu = new Menu(index++, Integer.parseInt(menuArr[i]), -1);
+
+                int val = Integer.parseInt(menuArr[i]);
+                //当前节点key
+                String key = i + "_" + val;
+                //判断是否有前一个节点并赋值
+                Menu pre = i - 1 >= 0 ? map.get((i - 1) + "_" + menuArr[i - 1]) : null;
+                //如果已经添加过此节点则不再添加
+                if (map.containsKey(key)) continue;
+                if (null == pre) {
+                    menu = new Menu(index++, i, val, -1);
                 } else {
-                    menu = new Menu(index++, Integer.parseInt(menuArr[i]), pre.getId());
+                    menu = new Menu(index++, i, val, pre.getId());
                 }
+                //map 与 list 都能提供查找
+                //存入map
+                map.put(key, menu);
+                //存入list
                 list.add(menu);
-                pre = menu;
             }
         }
         List<Menu> menuByVal = getMenuById(-1);
