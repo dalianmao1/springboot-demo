@@ -1,0 +1,24 @@
+spring:
+  datasource:
+    url: jdbc:h2:~/test
+    driver-class-name: org.h2.Driver
+    username: sa
+    password: sa
+  http:
+    encoding:
+      charset: UTF-8
+      enabled: true
+      force-response: true
+  h2:
+    console:
+      enabled: true #开启web console功能
+  sql:
+    init:
+      schema-locations: classpath:schema.sql
+      mode: always
+# xml方式
+#mybatis:
+#  mapper-locations: classpath:mapper/*.xml
+logging:
+  level:
+    com.middle.stage.test.mapper: DEBUG
